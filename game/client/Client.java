@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import game.game.Game;
 import game.packet.Packet00Login;
 import game.packet.Packet01Move;
+import game.packet.Packet02SynchroPlayers;
 import game.player.Player;
 import game.player.PlayerMP;
 
@@ -72,17 +73,34 @@ public class Client extends Thread {
 			System.out.println(packetLogin.getUsername() + " has connected ...");
 			
 			PlayerMP player = new PlayerMP(packetLogin.getUsername(), packetLogin.getX(), packetLogin.getY(), game.player);
-			player.x = 20;
-			player.y = 20;
 			game.connectedPlayers.add(player);
 			break;
 		case 01:
 			Packet01Move movePacket = new Packet01Move(packet.getData());
 			this.movePlayer(movePacket);
 			break;
+		case 02:
+			Packet02SynchroPlayers synchroPacket = new Packet02SynchroPlayers(packet.getData());
+			this.synchroPlayers(synchroPacket);
+			break;
 		}
 	}
 	
+	
+
+	private void synchroPlayers(Packet02SynchroPlayers synchroPacket) {
+		
+		for (Player p: synchroPacket.players) {
+			if (!p.name.equals(this.game.player.name)) {
+				
+				PlayerMP player = new PlayerMP(p.name, p.x, p.y, game.player);
+				this.game.connectedPlayers.add(player);
+				
+			}
+		}
+		
+	}
+
 	private void movePlayer(Packet01Move movePacket) {
 		
 		for (PlayerMP pMP : game.connectedPlayers) {

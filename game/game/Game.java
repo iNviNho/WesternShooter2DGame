@@ -90,7 +90,7 @@ public class Game extends Canvas implements Runnable {
 		Dimension size = new Dimension(this.dimWidth * this.scale, this.dimHeight * this.scale);
 		this.setPreferredSize(size);
 		
-		frame.setResizable(false);
+//		frame.setResizable(false);
 		frame.add(this);
 		frame.pack();
 		frame.setLocationRelativeTo(null);	
