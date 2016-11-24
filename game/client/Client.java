@@ -13,6 +13,7 @@ import game.game.Game;
 import game.packet.Packet00Login;
 import game.packet.Packet01Move;
 import game.packet.Packet02SynchroPlayers;
+import game.packet.Packet03Disconnect;
 import game.player.Player;
 import game.player.PlayerMP;
 
@@ -39,7 +40,7 @@ public class Client extends Thread {
 	
 	public void login(Player player) {
 		
-		Packet00Login packet = new Packet00Login(player.name, player.x, player.y);
+		Packet00Login packet = new Packet00Login(player.name, player.x, player.y, player.dir);
 		this.sendData(packet.getDataForSending());
 	}
 	
@@ -67,12 +68,13 @@ public class Client extends Thread {
 		
 		switch (packetId) {
 		default:
+			break;
 		// now we have a new player
 		case 00:
 			Packet00Login packetLogin = new Packet00Login(packet.getData());
-			System.out.println(packetLogin.getUsername() + " has connected ...");
+			System.out.println(packetLogin.username + " has connected ...");
 			
-			PlayerMP player = new PlayerMP(packetLogin.getUsername(), packetLogin.getX(), packetLogin.getY(), game.player);
+			PlayerMP player = new PlayerMP(packetLogin.username, packetLogin.x, packetLogin.y, packetLogin.dir, game.player);
 			game.connectedPlayers.add(player);
 			break;
 		case 01:
@@ -83,19 +85,34 @@ public class Client extends Thread {
 			Packet02SynchroPlayers synchroPacket = new Packet02SynchroPlayers(packet.getData());
 			this.synchroPlayers(synchroPacket);
 			break;
+		case 03:
+			Packet03Disconnect disconnectPacket = new Packet03Disconnect(packet.getData());
+			this.disconnectPlayer(disconnectPacket);
+			break;
 		}
 	}
 	
 	
+
+	private void disconnectPlayer(Packet03Disconnect disconnectPacket) {
+		
+		for (PlayerMP pMP : this.game.connectedPlayers) {
+			if (pMP.name.equals(disconnectPacket.username)) {
+				this.game.connectedPlayers.remove(pMP);
+				break;
+			}
+		}
+		
+	}
 
 	private void synchroPlayers(Packet02SynchroPlayers synchroPacket) {
 		
 		for (Player p: synchroPacket.players) {
 			if (!p.name.equals(this.game.player.name)) {
 				
-				PlayerMP player = new PlayerMP(p.name, p.x, p.y, game.player);
-				this.game.connectedPlayers.add(player);
-				
+				PlayerMP player = new PlayerMP(p.name, p.x, p.y, p.dir, game.player);
+				player.checkSprite();
+				this.game.connectedPlayers.add(player);	
 			}
 		}
 		
@@ -108,6 +125,9 @@ public class Client extends Thread {
 			if (pMP.name.equals(movePacket.username)) {
 				pMP.x = movePacket.x;
 				pMP.y = movePacket.y;
+				pMP.dir = movePacket.dir;
+				System.out.println(movePacket.dir);
+				pMP.checkSprite();
 				break;
 			}
 		}
@@ -139,7 +159,7 @@ public class Client extends Thread {
 		boolean isInteger = false;
 		while(!isInteger) {
 			
-			String port = JOptionPane.showInputDialog("Set port you want to connect to");
+			String port = JOptionPane.showInputDialog("Set port you want to connect to", "1234");
 			
 			if (isInteger(port)) {
 				this.port = Integer.parseInt(port);

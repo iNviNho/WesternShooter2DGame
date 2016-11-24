@@ -23,7 +23,7 @@ public class Packet02SynchroPlayers extends Packet {
 			
 			String[] playerArray = playersArray[i].split("\\|");
 			Player player = new Player(playerArray[0], Integer.parseInt(playerArray[1]), Integer.parseInt(playerArray[2]));
-						
+			player.dir = Integer.parseInt(playerArray[3]);
 			this.players.add(player);
 		}
 	}

@@ -3,8 +3,8 @@ package game.packet;
 public class Packet00Login extends Packet {
 
 	private byte[] data;
-	private String username;
-	private int x, y;
+	public String username;
+	public int x, y, dir;
 	
 	/**
 	 * Used when received packet
@@ -22,11 +22,12 @@ public class Packet00Login extends Packet {
 	/**
 	 * Used for sending packet
 	 */
-	public Packet00Login(String username, int x, int y) {
+	public Packet00Login(String username, int x, int y, int dir) {
         super(00);
         this.username = username;
         this.x = x;
         this.y = y;
+        this.dir = dir;
     }
 	
 	/**
@@ -34,18 +35,6 @@ public class Packet00Login extends Packet {
 	 * @return
 	 */
 	public byte[] getDataForSending() {
-		return ("00" + this.username + "|" + this.getX() + "|" + this.getY()).getBytes();
-	}
-	
-	public String getUsername() {
-		return this.username;
-	}
-	
-	public int getX() {
-		return this.x;
-	}
-	
-	public int getY() {
-		return this.y;
+		return ("00" + this.username + "|" + this.x + "|" + this.y + "|" + this.dir).getBytes();
 	}
 }

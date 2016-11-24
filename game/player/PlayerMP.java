@@ -11,9 +11,10 @@ public class PlayerMP extends Player {
 	
 	public Player player;
 	
-	public PlayerMP(String name, int x, int y, Player player) {
+	public PlayerMP(String name, int x, int y, int dir, Player player) {
 		super(name, x, y);
 		this.player = player;
+		this.dir = dir;
 	}
 	
 	public void render(Screen screen) {

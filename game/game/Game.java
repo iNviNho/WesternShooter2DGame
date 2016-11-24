@@ -19,6 +19,7 @@ import game.map.Map;
 import game.player.Player;
 import game.player.PlayerMP;
 import game.screen.Screen;
+import game.window.Window;
 
 public class Game extends Canvas implements Runnable {
 
@@ -28,6 +29,7 @@ public class Game extends Canvas implements Runnable {
 	private JFrame frame;
 	private Screen screen;
 	private Keyboard keyboard;
+	private Window window;
 	
 	private Map map;
 	public Player player;
@@ -67,6 +69,10 @@ public class Game extends Canvas implements Runnable {
 		this.client = new Client(this, "localhost");
 		
 		this.player = new Player(20, 20, this.keyboard, this.map, this.client, JOptionPane.showInputDialog(this, "Set your name", "Western shooter | Set your unique name", JOptionPane.INFORMATION_MESSAGE));
+	
+		this.window = new Window(this.client, this.player);
+		this.frame.addWindowListener(window);
+	
 	}
 	
 	public void setDimensionAndPixels() {

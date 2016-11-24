@@ -82,8 +82,8 @@ public class Player {
 		}
 
 		if (x != 0 || y!= 0) {
-			this.move(x, y);
 			this.checkSprite();
+			this.move(x, y);
 		}
 	}
 	
@@ -108,8 +108,8 @@ public class Player {
 	}
 	
 	private void handleMove() {
-		Packet01Move packetMove = new Packet01Move(this.name, this.x, this.y);
-		System.out.println(this.name + " position " + this.x + " | " + this.y );
+		System.out.println(this.dir);
+		Packet01Move packetMove = new Packet01Move(this.name, this.x, this.y, this.dir);
 		client.sendData(packetMove.getDataForSending());		
 	}
 

@@ -3,7 +3,7 @@ package game.packet;
 public class Packet01Move extends Packet {
 
 	public String username;
-	public int x, y;
+	public int x, y, dir;
 	
 	/**
 	 * Used when received packet
@@ -16,16 +16,18 @@ public class Packet01Move extends Packet {
 		this.username = dataArray[0];
 		this.x = Integer.parseInt(dataArray[1]);
 		this.y = Integer.parseInt(dataArray[2]);
+		this.dir = Integer.parseInt(dataArray[3]);
 	}
 	
 	/**
 	 * Used for sending packet
 	 */
-	public Packet01Move(String username, int x, int y) {
+	public Packet01Move(String username, int x, int y, int dir) {
         super(00);
         this.username = username;
         this.x = x;
         this.y = y;
+        this.dir = dir;
     }
 	
 	/**
@@ -33,7 +35,7 @@ public class Packet01Move extends Packet {
 	 * @return
 	 */
 	public byte[] getDataForSending() {
-		return ("01" + this.username + "|" + this.x + "|" + this.y + "| ").getBytes();
+		return ("01" + this.username + "|" + this.x + "|" + this.y + "|" + this.dir + "| ").getBytes();
 	}
 
 }
