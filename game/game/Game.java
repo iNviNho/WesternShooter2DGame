@@ -1,8 +1,10 @@
 package game.game;
 
 import java.awt.Canvas;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
@@ -16,6 +18,7 @@ import javax.swing.JOptionPane;
 import game.client.Client;
 import game.keyboard.Keyboard;
 import game.map.Map;
+import game.mouse.Mouse;
 import game.player.Player;
 import game.player.PlayerMP;
 import game.screen.Screen;
@@ -28,6 +31,8 @@ public class Game extends Canvas implements Runnable {
 	private Thread thread;
 	private JFrame frame;
 	private Screen screen;
+	
+	private Mouse mouse;
 	private Keyboard keyboard;
 	private Window window;
 	
@@ -66,13 +71,17 @@ public class Game extends Canvas implements Runnable {
 		this.map = new Map(38, 10);
 		this.keyboard = new Keyboard();
 		this.addKeyListener(keyboard);
+		this.mouse = new Mouse();
+		this.addMouseListener(mouse);
+		this.addMouseMotionListener(mouse);
 		this.client = new Client(this, "localhost");
 		
-		this.player = new Player(20, 20, this.keyboard, this.map, this.client, JOptionPane.showInputDialog(this, "Set your name", "Western shooter | Set your unique name", JOptionPane.INFORMATION_MESSAGE));
+		this.player = new Player(20, 20, this.mouse, this.keyboard, this.map, this.client, JOptionPane.showInputDialog(this, "Set your name", "Western shooter | Set your unique name", JOptionPane.INFORMATION_MESSAGE));
 	
 		this.window = new Window(this.client, this.player);
 		this.frame.addWindowListener(window);
-	
+		
+		this.disableCursor();
 	}
 	
 	public void setDimensionAndPixels() {
@@ -96,7 +105,7 @@ public class Game extends Canvas implements Runnable {
 		Dimension size = new Dimension(this.dimWidth * this.scale, this.dimHeight * this.scale);
 		this.setPreferredSize(size);
 		
-//		frame.setResizable(false);
+		frame.setResizable(false);
 		frame.add(this);
 		frame.pack();
 		frame.setLocationRelativeTo(null);	
@@ -130,6 +139,9 @@ public class Game extends Canvas implements Runnable {
 			pMP.render(this.screen);
 		}
 		
+		// we render cursor
+		screen.renderCursor(this.mouse.getX(), this.mouse.getY());
+		
 		for (int i = 0; i < this.pixels.length; i++) {
 			this.pixels[i] = this.screen.pixels[i];
 		}
@@ -137,6 +149,7 @@ public class Game extends Canvas implements Runnable {
 		Graphics g = bs.getDrawGraphics();
 		g.drawImage(this.image, 0, 0, this.getWidth(), this.getHeight(), null);
 		this.player.renderName(g, this);
+		this.player.renderCurrentGunInfo(g, this);
 		
 		for (PlayerMP pMP : this.connectedPlayers) {
 			pMP.renderName(g, this);
@@ -174,6 +187,13 @@ public class Game extends Canvas implements Runnable {
 				frames = 0;
 			}
 		}
+	}
+	
+	private void disableCursor() {
+		BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+		    cursorImg, new Point(0, 0), "blank cursor");
+		this.frame.getContentPane().setCursor(blankCursor);
 	}
 	
 	public synchronized void start() {

@@ -12,7 +12,7 @@ public class Sprite {
 	public static Sprite grass = new Sprite(16, 16, 0, 0, SpriteSheet.spritesheet);
 	public static Sprite box = new Sprite(16, 16, 16, 0, SpriteSheet.spritesheet);
 	public static Sprite projectile = new Sprite(16, 16, 1, 1, SpriteSheet.spritesheet);
-	public static Sprite cursor = new Sprite(16, 16, 1, 2, SpriteSheet.spritesheet);
+	public static Sprite cursor = new Sprite(16, 16, 16, 32, SpriteSheet.spritesheet);
 	public static Sprite voidSprite = new Sprite(16, 16, 0, 16, SpriteSheet.spritesheet);
 	public static Sprite voidSpriteAnimated = new Sprite(16, 16, 0, 2, SpriteSheet.spritesheet);
 	
@@ -32,6 +32,9 @@ public class Sprite {
 	
 	public static Sprite player_left_1 = new Sprite(32, 32, 96, 192, SpriteSheet.spritesheet);
 	public static Sprite player_left_2 = new Sprite(32, 32, 96, 224, SpriteSheet.spritesheet);
+	
+	public static Sprite easy_gun_sprite = new Sprite(16, 16, 32, 32, SpriteSheet.spritesheet);
+	public static Sprite easy_gun_ammo = new Sprite(16, 16, 16, 16, SpriteSheet.spritesheet);
 
 	
 	public Sprite(int sizeX, int sizeY, int spriteSheetX, int spriteSheetY, SpriteSheet sheet) {

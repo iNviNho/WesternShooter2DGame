@@ -1,5 +1,7 @@
 package game.screen;
 
+import game.spritesheet.Sprite;
+
 public class Screen {
 
 	public int width;
@@ -32,6 +34,24 @@ public class Screen {
 	public void setOffset(int xOffset, int yOffset) {
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
+	}
+
+	public void renderCursor(int x, int y) {
+		
+		if (x < 0 || y < 30 || (x / 3) > this.width - 4 || (y / 3) > this.height - 4) {
+			return;
+		}
+		
+		Sprite cursor = Sprite.cursor;
+		
+		for (int cursorX = 0; cursorX < cursor.sizeX; cursorX++) {
+			for (int cursorY = 0; cursorY < cursor.sizeY; cursorY++) {
+				if (cursor.pixels[cursorX + cursorY * cursor.sizeX] != 0xffc5c5c5) {
+					this.pixels[( (x / 3) + cursorX - 8) + ( (y / 3) + cursorY - 8) * this.width] = cursor.pixels[cursorX + cursorY * cursor.sizeX];
+				}
+			}
+		}
+		
 	}
 	
 }

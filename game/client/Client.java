@@ -126,7 +126,6 @@ public class Client extends Thread {
 				pMP.x = movePacket.x;
 				pMP.y = movePacket.y;
 				pMP.dir = movePacket.dir;
-				System.out.println(movePacket.dir);
 				pMP.checkSprite();
 				break;
 			}
