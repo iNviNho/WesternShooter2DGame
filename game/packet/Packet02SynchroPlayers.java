@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import game.player.Player;
+import game.player.PlayerMP;
 
 public class Packet02SynchroPlayers extends Packet {
 
-	public List<Player> players = new ArrayList<Player>();
+	public List<PlayerMP> players = new ArrayList<PlayerMP>();
 	
 	public Packet02SynchroPlayers(byte[] data) {
 		super(02);
@@ -22,9 +23,8 @@ public class Packet02SynchroPlayers extends Packet {
 		for (int i = 0; i < playersArray.length; i++) {
 			
 			String[] playerArray = playersArray[i].split("\\|");
-			Player player = new Player(playerArray[0], Integer.parseInt(playerArray[1]), Integer.parseInt(playerArray[2]));
-			player.dir = Integer.parseInt(playerArray[3]);
-			this.players.add(player);
+			PlayerMP playerMP = new PlayerMP(playerArray[0], Integer.parseInt(playerArray[1]), Integer.parseInt(playerArray[2]), Integer.parseInt(playerArray[3]));
+			this.players.add(playerMP);
 		}
 	}
 

@@ -21,112 +21,127 @@ import game.projectile.Projectile;
 import game.screen.Screen;
 import game.spritesheet.Sprite;
 import game.tile.Tile;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
-public class Player {
-
-	public String name;
-	public int x;
-	public int y;
-	public int dir = 2;
+public class Player extends Entity {
+	
 	public Keyboard key;
-	private Mouse mouse;
-	protected Sprite sprite;
-	public boolean walking = false;
-	public int animations = 0;
-	public Map map;
+	private Mouse mouse;	
+	
 	private Client client;
+	
+	private Map map;
 	private Game game;
 	
+	// list of guns that player has
 	public List<Gun> guns = new ArrayList<Gun>();
-	public List<Ammo> ammos = new ArrayList<Ammo>();
-	public List<Projectile> projectiles = new ArrayList<Projectile>();
 	private int activeGunId;
-	
+	// list of all ammos that player has
+	public List<Ammo> ammos = new ArrayList<Ammo>();
+	// list of currently active projectiles
+	public List<Projectile> projectiles = new ArrayList<Projectile>();
+
 	private boolean mayShoot = true;
 	private int mayShootTick = 0;
 	
-	public Player(Keyboard key, Map map, String name) {
-		this.x = new Random().nextInt(100);
-		this.y = new Random().nextInt(100);
-		this.key = key;
-		this.sprite = Sprite.player_down;
-		this.map = map;
-		this.name = name;
-	}
+	private boolean mayReload = true;
+	private int mayReloadTick = 0;
 	
-	public Player(String name, int x, int y) {
-		this.sprite = Sprite.player_down;
-		this.name = name;
-		this.x = x;
-		this.y = y;
-	}
-	
-	public Player(int x, int y, Mouse mouse, Keyboard key, Game game, Map map, Client client, String name) {
-		this.x = x;
-		this.y = y;
+	public Player(String name, int x, int y, Mouse mouse, Keyboard key, Game game, Map map, Client client) {
+		super(name, x, y);
 		this.mouse = mouse;
 		this.key = key;
-		this.sprite = Sprite.player_down;
-		this.map = map;
-		this.name = name;
-		this.client = client;
 		this.game = game;
+		this.map = map;
+		this.client = client;
 		
+		this.addDefaultGun();
+		this.addDefaultAmmo();
+	}
+	
+	public void addDefaultGun() {
 		Gun gun = new EasyGun();
 		this.guns.add(gun);
 		this.activeGunId = gun.id;
-		
+	}
+	
+	public void addDefaultAmmo() {
 		Ammo ammo = new EasyGunAmmo();
 		this.ammos.add(ammo);
-	}
+	}	
 	
 	public void update() {
 		
-		if (this.animations < 7500) {
-			this.animations++;
-		} else {
-			this.animations = 0;
-		}
+		this.checkMovementKey();
+		this.checkShooting();
+		this.checkReload();
 		
-		this.updateProjectiles();
+	}
+	
+	private void checkMovementKey() {
 		
-		int y = 0;
 		int x = 0;
+		int y = 0;
 		
 		if (this.key.up) {
 			y--;
-			this.dir = 0;
+			this.direction = 0;
 		}
 		if (this.key.down) {
 			y++;
-			this.dir = 2;
+			this.direction = 2;
 		}
 		if (this.key.left) {
 			x--;
-			this.dir = 3;
+			this.direction = 3;
 		}
 		if (this.key.right) {
 			x++;
-			this.dir = 1;
-		}
-		if (this.key.r) {
-			this.ammoReload();
+			this.direction = 1;
 		}
 		
-		if (this.mouse.getButton() == 1) {
-			
-			
-			double dx = (Mouse.getX() - 48) - (this.game.screenWidth / 2);
-			double dy = (Mouse.getY() - 8) - (this.game.screenHeight / 2);
-			
-			double dir = Math.atan2(dy, dx);
-			
-			this.shoot(dir);
-		}
-
 		if (x != 0 || y!= 0) {
-			this.checkSprite();
-			this.move(x, y);
+			this.tryMove(x, y);
+		}
+		
+	}
+	
+	private void tryMove(int x, int y) {
+		
+		if (!this.checkCollision(x, 0)) {
+			this.move(x, 0);
+			this.sendMovePacket();
+		}
+		if (!this.checkCollision(0, y)) {
+			this.move(0, y);
+			this.sendMovePacket();
+		}
+		
+		if (x != 0 || y != 0) {
+			this.isWalking = true;
+		} else {
+			this.isWalking = false;
+		}
+		
+		this.checkSprite();
+	}
+	
+	public void move(int x, int y) {
+		this.x += x;
+		this.y += y;
+	}
+	
+	private void sendMovePacket() {
+		Packet01Move packetMove = new Packet01Move(this.name, this.x, this.y, this.direction);
+		client.sendData(packetMove.getDataForSending());		
+	}
+	
+	private void checkShooting() {
+		
+		if (this.mouse.getButton() == 1 && this.mayShoot) {			
+			this.shoot();
+			this.mayShoot = false;
 		}
 		
 		if (!this.mayShoot) {
@@ -136,24 +151,68 @@ public class Player {
 				this.mayShootTick = 0;
 			}
 		}
+		
+		this.updateProjectiles();
 	}
 	
-	private void ammoReload() {
+	/**
+	 * Performs shoot
+	 */
+	private void shoot() {	
+		if (this.getActiveGun().hasAmmoInBin()) {
+			
+			double dx = (this.mouse.getX() - 48) - (this.game.screenWidth / 2);
+			double dy = (this.mouse.getY() - 8) - (this.game.screenHeight / 2);
+			
+			double dir = Math.atan2(dy, dx);
+			
+			Projectile projectile = new Projectile(this.x + 16, this.y + 16, dir, this.map, this.getAmmoToActiveGun());
+			this.projectiles.add(projectile);
+			
+			this.getActiveGun().inBin -= 1;
+			
+//			MediaPlayer mediaPlayer = new MediaPlayer(this.getAmmoToActiveGun().media);
+//			mediaPlayer.setVolume(0.3);
+//			mediaPlayer.play();
+		}
+	}
+	
+	/**
+	 * Reloading logic 
+	 */
+	private void checkReload() {
+		if (this.key.r && this.mayReload) {			
+			this.reloadGun();
+			this.mayReload = false;
+			return;
+		}
+		
+		if (!this.mayReload) {
+			this.mayReloadTick++;
+			if (this.mayReloadTick > 10) {
+				this.mayReload = true;
+				this.mayReloadTick = 0;
+			}
+		}
+	}
+	
+	/**
+	 * Reloads active gun
+	 */
+	private void reloadGun() {
 		
 		if (this.getAmmoToActiveGun().number > this.getActiveGun().binSize) {
 			this.getActiveGun().inBin = this.getActiveGun().binSize;
-			
 			this.getAmmoToActiveGun().number -= this.getActiveGun().binSize;
+			this.getActiveGun().inBin = this.getActiveGun().binSize;
 		} else {
 			this.getActiveGun().inBin = this.getAmmoToActiveGun().number;
 			
 			this.getAmmoToActiveGun().number = 0;
 		}
 		
-		
-		this.getActiveGun().inBin = this.getAmmoToActiveGun().number;
 	}
-
+	
 	private void updateProjectiles() {
 		for (int i = 0; i < this.projectiles.size(); i++) {
 			
@@ -166,45 +225,36 @@ public class Player {
 			}
 		}
 	}
-
-	private void shoot(double dir) {	
-		
-		if (this.mayShoot) {
-			if (this.getActiveGun().hasAmmoInBin()) {
-				Projectile projectile = new Projectile(this.x + 16, this.y + 16, dir, this.map, this.getAmmoToActiveGun());
-				this.projectiles.add(projectile);
-				
-				this.getActiveGun().inBin -= 1;
-				
-				this.mayShoot = false;
-			}
-		}
-		
-	}
-
-	public void move(int x, int y) {
-		
-		if (!this.checkCollision(x, 0)) {
-			this.x = this.x + x;
-			this.handleMove();
-			
-		}
-		if (!this.checkCollision(0, y)) {
-			this.y = this.y + y;
-			this.handleMove();
-		}
-		
-		if (x != 0 || y != 0) {
-			this.walking = true;
-		} else {
-			this.walking = false;
-		}
-		
+	
+	public void render(Screen screen) {
+		this.renderPlayer(screen);
+		this.renderProjectiles(screen);
 	}
 	
-	private void handleMove() {
-		Packet01Move packetMove = new Packet01Move(this.name, this.x, this.y, this.dir);
-		client.sendData(packetMove.getDataForSending());		
+	protected void renderPlayer(Screen screen) {
+		for (int pw = 0; pw < this.sprite.sizeX; pw++) {
+			for (int ph = 0; ph < this.sprite.sizeY; ph++) {
+				if (this.sprite.pixels[pw + ph * this.sprite.sizeX] != 0xffff00ff) {
+						screen.pixels[ (pw + screen.xMapOffset) + (ph + screen.yMapOffset)  * screen.width] = this.sprite.pixels[pw + ph * this.sprite.sizeX];
+				}
+			}
+		}
+	}
+	
+	protected void renderProjectiles(Screen screen) {
+		for (int i = 0; i < this.projectiles.size(); i++) {
+			this.projectiles.get(i).render(screen);
+		}
+	}
+	
+	public void renderName(Graphics g, Game game) {		
+		g.setColor(Color.white);
+		g.setFont(new Font("TimesRoman", Font.BOLD, 32)); 
+		g.drawString(this.name.toUpperCase(), game.screenWidth / 2 - (this.name.length() * 10) + 45, game.screenHeight / 2 - 90);		
+	}
+
+	public void renderCurrentGunInfo(Graphics g, Game game) {
+		g.drawString(this.getActiveGun().getBinInfo(this.getAmmoToActiveGun()) , 30, game.screenHeight - 200);
 	}
 
 	private boolean checkCollision(int x, int y) {
@@ -225,61 +275,55 @@ public class Player {
 		
 		return solid;
 	}
-	
-	public void render(Screen screen) {
-		for (int pw = 0; pw < this.sprite.sizeX; pw++) {
-			for (int ph = 0; ph < this.sprite.sizeY; ph++) {
-				if (this.sprite.pixels[pw + ph * this.sprite.sizeX] != 0xffff00ff) {
-						screen.pixels[ (pw + screen.xMapOffset) + (ph + screen.yMapOffset)  * screen.width] = this.sprite.pixels[pw + ph * this.sprite.sizeX];
-				}
-			}
-		}
-		
-		this.renderProjectiles(screen);
-	}
-	
-	private void renderProjectiles(Screen screen) {
-		for (int i = 0; i < this.projectiles.size(); i++) {
-			this.projectiles.get(i).render(screen);
-		}
-	}
 
 	public void checkSprite() {
 		
-		if (this.dir == 0) {
+		if (this.isWalking) {
+			this.walkingTicks++;
+			
+			// if user is walking more than 1 minute we set walkingTicks
+			// to 0 for some safety reason
+			if (this.walkingTicks > 3600) {
+				this.walkingTicks = 0;
+			}
+		} else {
+			this.walkingTicks = 0;
+		}
+		
+		if (this.direction == 0) {
 			this.sprite = Sprite.player_up;
-			if (this.walking) {
-				if (this.animations % 20 > 10) {
+			if (this.isWalking) {
+				if (this.walkingTicks % 20 > 10) {
 					this.sprite = Sprite.player_up_1;
 				} else {
 					this.sprite = Sprite.player_up_2;
 				}
 			}
 		}
-		if (this.dir == 1) {
+		if (this.direction == 1) {
 			this.sprite = Sprite.player_right;
-			if (this.walking) {
-				if (this.animations % 20 > 10) {
+			if (this.isWalking) {
+				if (this.walkingTicks % 20 > 10) {
 					this.sprite = Sprite.player_right_1;
 				} else {
 					this.sprite = Sprite.player_right_2;
 				}
 			}
 		}
-		if (this.dir == 2) {
+		if (this.direction == 2) {
 			this.sprite = Sprite.player_down;
-			if (this.walking) {
-				if (this.animations % 20 > 10) {
+			if (this.isWalking) {
+				if (this.walkingTicks % 20 > 10) {
 					this.sprite = Sprite.player_down_1;
 				} else {
 					this.sprite = Sprite.player_down_2;
 				}
 			}
 		}
-		if (this.dir == 3) {
+		if (this.direction == 3) {
 			this.sprite = Sprite.player_left;
-			if (this.walking) {
-				if (this.animations % 20 > 10) {
+			if (this.isWalking) {
+				if (this.walkingTicks % 20 > 10) {
 					this.sprite = Sprite.player_left_1;
 				} else {
 					this.sprite = Sprite.player_left_2;
@@ -289,6 +333,10 @@ public class Player {
 
 	}
 	
+	/**
+	 * Return currently active gun
+	 * @return Gun
+	 */
 	public Gun getActiveGun() {
 		
 		Gun gun = null;
@@ -298,14 +346,21 @@ public class Player {
 				break;
 			}
 		}
-		
 		return gun;
 	}
 	
+	/**
+	 * Returns number of ammo in active guns bin
+	 * @return int
+	 */
 	public int getAmmoInBin() {
 		return this.getActiveGun().inBin;
 	}
 	
+	/**
+	 * Returns active gun ammo
+	 * @return Ammo
+	 */
 	public Ammo getAmmoToActiveGun() {
 		
 		Ammo ammo = null;
@@ -315,17 +370,6 @@ public class Player {
 				break;
 			}
 		}
-		
 		return ammo;
-	}
-
-	public void renderName(Graphics g, Game game) {		
-		g.setColor(Color.white);
-		g.setFont(new Font("TimesRoman", Font.BOLD, 32)); 
-		g.drawString(this.name.toUpperCase(), game.screenWidth / 2 - (this.name.length() * 10) + 45, game.screenHeight / 2 - 90);		
-	}
-
-	public void renderCurrentGunInfo(Graphics g, Game game) {
-		g.drawString(this.getActiveGun().getBinInfo(this.getAmmoToActiveGun()) , 30, game.screenHeight - 200);
 	}
 }

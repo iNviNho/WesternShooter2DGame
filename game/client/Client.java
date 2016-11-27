@@ -40,7 +40,7 @@ public class Client extends Thread {
 	
 	public void login(Player player) {
 		
-		Packet00Login packet = new Packet00Login(player.name, player.x, player.y, player.dir);
+		Packet00Login packet = new Packet00Login(player.name, player.x, player.y, player.direction);
 		this.sendData(packet.getDataForSending());
 	}
 	
@@ -74,7 +74,7 @@ public class Client extends Thread {
 			Packet00Login packetLogin = new Packet00Login(packet.getData());
 			System.out.println(packetLogin.username + " has connected ...");
 			
-			PlayerMP player = new PlayerMP(packetLogin.username, packetLogin.x, packetLogin.y, packetLogin.dir, game.player);
+			PlayerMP player = new PlayerMP(packetLogin.username, packetLogin.x, packetLogin.y, packetLogin.dir);
 			game.connectedPlayers.add(player);
 			break;
 		case 01:
@@ -107,12 +107,9 @@ public class Client extends Thread {
 
 	private void synchroPlayers(Packet02SynchroPlayers synchroPacket) {
 		
-		for (Player p: synchroPacket.players) {
-			if (!p.name.equals(this.game.player.name)) {
-				
-				PlayerMP player = new PlayerMP(p.name, p.x, p.y, p.dir, game.player);
-				player.checkSprite();
-				this.game.connectedPlayers.add(player);	
+		for (PlayerMP pMP: synchroPacket.players) {
+			if (!pMP.name.equals(this.game.player.name)) {
+				this.game.connectedPlayers.add(pMP);	
 			}
 		}
 		
@@ -125,7 +122,7 @@ public class Client extends Thread {
 			if (pMP.name.equals(movePacket.username)) {
 				pMP.x = movePacket.x;
 				pMP.y = movePacket.y;
-				pMP.dir = movePacket.dir;
+				pMP.direction = movePacket.dir;
 				pMP.checkSprite();
 				break;
 			}

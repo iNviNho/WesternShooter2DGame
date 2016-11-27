@@ -11,9 +11,11 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import game.client.Client;
 import game.keyboard.Keyboard;
@@ -23,6 +25,7 @@ import game.player.Player;
 import game.player.PlayerMP;
 import game.screen.Screen;
 import game.window.Window;
+import javafx.embed.swing.JFXPanel;
 
 public class Game extends Canvas implements Runnable {
 
@@ -76,11 +79,13 @@ public class Game extends Canvas implements Runnable {
 		this.addMouseMotionListener(mouse);
 		this.client = new Client(this, "localhost");
 		
-		this.player = new Player(20, 20, this.mouse, this.keyboard, this, this.map, this.client, JOptionPane.showInputDialog(this, "Set your name", "Western shooter | Set your unique name", JOptionPane.INFORMATION_MESSAGE));
+		String name = JOptionPane.showInputDialog(this, "Set your name", "Western shooter | Set your unique name", JOptionPane.INFORMATION_MESSAGE);
+		this.player = new Player(name ,20 ,20 ,this.mouse , this.keyboard, this, this.map, this.client);
 	
 		this.window = new Window(this.client, this.player);
 		this.frame.addWindowListener(window);
 		
+		this.initializeJavaFx();
 		this.disableCursor();
 	}
 	
@@ -187,6 +192,21 @@ public class Game extends Canvas implements Runnable {
 				frames = 0;
 			}
 		}
+	}
+	
+	private void initializeJavaFx() {
+//		final CountDownLatch latch = new CountDownLatch(1);
+//		SwingUtilities.invokeLater(new Runnable() {
+//		    public void run() {
+//		        new JFXPanel(); // initializes JavaFX environment
+//		        latch.countDown();
+//		    }
+//		});
+//		try {
+//			latch.await();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 	private void disableCursor() {
