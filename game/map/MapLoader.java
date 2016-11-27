@@ -1,7 +1,11 @@
 package game.map;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Scanner;
 
 import game.spritesheet.Sprite;
@@ -28,8 +32,48 @@ public class MapLoader {
 		}
 	}
 	
-	public void fillMap(Map map) {
+	public int getXChars() {
 		
+		int xChars = 0;
+		
+		char current;
+		String line = this.txt.nextLine();
+		for (int i = 0; i < 10000; i++) {
+		
+			try {
+				current = line.charAt(i);
+			} catch (StringIndexOutOfBoundsException e) {
+				return i;
+			}
+			
+		}
+		
+		return 10000;
+	}
+
+	public int getYChars() throws IOException {
+		InputStream is = new BufferedInputStream(new FileInputStream(this.mapName));
+	    try {
+	        byte[] c = new byte[1024];
+	        int count = 0;
+	        int readChars = 0;
+	        boolean empty = true;
+	        while ((readChars = is.read(c)) != -1) {
+	            empty = false;
+	            for (int i = 0; i < readChars; ++i) {
+	                if (c[i] == '\n') {
+	                    ++count;
+	                }
+	            }
+	        }
+	        return (count == 0 && !empty) ? 1 : count + 1;
+	    } finally {
+	        is.close();
+	    }
+	}
+	
+	public void fillMap(Map map) {
+		this.loadMap();
         for (int ms = 0; ms < map.heightSize; ms++) {
         	// for every new line in map
         	String line = txt.nextLine();

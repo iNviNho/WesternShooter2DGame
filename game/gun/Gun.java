@@ -9,7 +9,7 @@ public class Gun {
 	private String name;
 	private Sprite sprite;
 	public int inBin;
-	private int binSize;
+	public int binSize;
 	private int maxBins;
 	private int firerate;
 	public int acceptedAmmoId;
@@ -32,4 +32,12 @@ public class Gun {
 		return info;
 	}
 
+	public boolean hasAmmoInBin() {
+		if (this.inBin > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 }

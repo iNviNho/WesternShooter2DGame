@@ -11,7 +11,7 @@ public class Sprite {
 
 	public static Sprite grass = new Sprite(16, 16, 0, 0, SpriteSheet.spritesheet);
 	public static Sprite box = new Sprite(16, 16, 16, 0, SpriteSheet.spritesheet);
-	public static Sprite projectile = new Sprite(16, 16, 1, 1, SpriteSheet.spritesheet);
+	public static Sprite projectile = new Sprite(7, 7, 64, 0, SpriteSheet.spritesheet);
 	public static Sprite cursor = new Sprite(16, 16, 16, 32, SpriteSheet.spritesheet);
 	public static Sprite voidSprite = new Sprite(16, 16, 0, 16, SpriteSheet.spritesheet);
 	public static Sprite voidSpriteAnimated = new Sprite(16, 16, 0, 2, SpriteSheet.spritesheet);
@@ -34,7 +34,7 @@ public class Sprite {
 	public static Sprite player_left_2 = new Sprite(32, 32, 96, 224, SpriteSheet.spritesheet);
 	
 	public static Sprite easy_gun_sprite = new Sprite(16, 16, 32, 32, SpriteSheet.spritesheet);
-	public static Sprite easy_gun_ammo = new Sprite(16, 16, 16, 16, SpriteSheet.spritesheet);
+	public static Sprite easy_gun_ammo = new Sprite(7, 7, 21, 20, SpriteSheet.spritesheet);
 
 	
 	public Sprite(int sizeX, int sizeY, int spriteSheetX, int spriteSheetY, SpriteSheet sheet) {
@@ -61,8 +61,8 @@ public class Sprite {
 	}
 
 	private void load() {
-		for (int y = 0; y < this.sizeX; y++) {
-			for (int x = 0; x < this.sizeY; x++) {
+		for (int y = 0; y < this.sizeY; y++) {
+			for (int x = 0; x < this.sizeX; x++) {
 				this.pixels[x + y * this.sizeX] = this.sheet.pixels[(x + this.spriteSheetX) + (y + this.spriteSheetY) * this.sheet.sizex];
 			}
 		}

@@ -29,47 +29,6 @@ public class Tile {
 				
 			}
 		}
-		
-		
-		
-//		for (int x = 0; x < this.sprite.sizeX; x++) {
-//			for (int y = 0; y < this.sprite.sizeY; y++) {
-//				
-//				// we setup x and y pos
-//				int xpos;
-//				// xpos rendering WAT
-//				if ( player.x > 0) {
-//					xpos = x + (w * 16) + (player.x % 16) ;
-//				} else {
-//					if ( (player.x % 16) == 0  ) {
-//						xpos = x + (w * 16);
-//					} else {
-//						xpos = x + (w * 16) + (player.x % 16) + 16;
-//					}
-//				}
-//				
-//				
-//				int ypos;
-//				// ypos rendering WAT
-//				if ( player.y > 0) {
-//					ypos = y + (h * 16);
-//				} else {
-//					if ( (player.y % 16) == 0  ) {
-//						ypos = y + (h * 16);
-//					} else {
-//						ypos = y + (h * 16) + (player.y % 16) + 16;
-//					}
-//				}
-//				
-////				xpos = x + w * 16;
-//				if (xpos < 0 || xpos >= screen.width) break;
-//				if (ypos < 0 || ypos >= screen.height) break;
-//				
-//				screen.pixels[xpos + ypos * screen.width] = this.sprite.pixels[x + y * this.sprite.sizeX];
-//				
-//			}
-//		}
-		
 	}
 	
 	public Boolean isSolid() {

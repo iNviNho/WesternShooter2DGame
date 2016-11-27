@@ -68,7 +68,7 @@ public class Game extends Canvas implements Runnable {
 		this.setResolution();
 		
 		this.screen = new Screen(this.dimWidth, this.dimHeight);
-		this.map = new Map(38, 10);
+		this.map = new Map("Map1");
 		this.keyboard = new Keyboard();
 		this.addKeyListener(keyboard);
 		this.mouse = new Mouse();
@@ -76,7 +76,7 @@ public class Game extends Canvas implements Runnable {
 		this.addMouseMotionListener(mouse);
 		this.client = new Client(this, "localhost");
 		
-		this.player = new Player(20, 20, this.mouse, this.keyboard, this.map, this.client, JOptionPane.showInputDialog(this, "Set your name", "Western shooter | Set your unique name", JOptionPane.INFORMATION_MESSAGE));
+		this.player = new Player(20, 20, this.mouse, this.keyboard, this, this.map, this.client, JOptionPane.showInputDialog(this, "Set your name", "Western shooter | Set your unique name", JOptionPane.INFORMATION_MESSAGE));
 	
 		this.window = new Window(this.client, this.player);
 		this.frame.addWindowListener(window);

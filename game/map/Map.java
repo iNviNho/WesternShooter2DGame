@@ -1,5 +1,7 @@
 package game.map;
 
+import java.io.IOException;
+
 import game.player.Player;
 import game.screen.Screen;
 import game.spritesheet.Sprite;
@@ -12,16 +14,20 @@ public class Map {
 	public Tile tiles[];
 	public int animations;
 	
-	public Map(int widthSize,int heightSize) {
-		this.widthSize = widthSize;
-		this.heightSize = heightSize;
-		this.tiles = new Tile[widthSize * heightSize];
-		this.fulfilTiles();
-	}
-	
-	public void fulfilTiles() {
+	public Map(String mapName) {
 		
 		MapLoader mapLoader = new MapLoader("Map1");
+		
+		try {
+			this.widthSize = mapLoader.getXChars();
+			this.heightSize = mapLoader.getYChars();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		this.tiles = new Tile[this.widthSize * this.heightSize];
+		
 		mapLoader.fillMap(this);
 	}
 	
@@ -40,25 +46,7 @@ public class Map {
 				this.findTile(x, y).renderTile(x << 4, y << 4, screen);
 				
 			}
-		}
-		
-		
-		
-		
-		
-		
-		
-//		int xTileOffset = (player.x + screen.xMapOffset) / 16;
-//		int yTileOffset = (player.y + screen.yMapOffset) / 16;
-//		
-//		for (int h = 0; h < screen.height / 16; h++) {
-//			for (int w = -1; w < screen.width / 16; w++) {
-//			
-//				this.findTile(w - xTileOffset, h - yTileOffset).renderTile(w, h, screen, player);
-//				
-////				screen.pixels[0 + 0 * screen.width] = 0xffc5c5c5;
-//			}
-//		}		
+		}	
 	}
 	
 	public void update() {
@@ -75,7 +63,7 @@ public class Map {
 	public Tile findTile(int tileXpos, int tileYpos) {
 		
 		if (tileXpos < 0 || tileYpos < 0) return this.tiles[1]; 
-		if (tileXpos >= 38  || tileYpos >= 10) return this.tiles[1]; 
+		if (tileXpos >= this.widthSize  || tileYpos >= this.heightSize) return this.tiles[1]; 
 		
 		Tile tile;
 		try {
