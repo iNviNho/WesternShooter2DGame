@@ -1,8 +1,11 @@
 package game.player;
 
 import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
 
 import game.game.Game;
+import game.projectile.Projectile;
 import game.screen.Screen;
 import game.spritesheet.Sprite;
 
@@ -16,6 +19,8 @@ public abstract class Entity {
 
 	public boolean isWalking = false;
 	public int walkingTicks = 0;
+	
+	public List<Projectile> projectiles = new ArrayList<Projectile>();
 	
 	public Entity(String name, int x, int y) {
 		this.name = name;

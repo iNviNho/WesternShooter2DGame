@@ -39,7 +39,7 @@ public class Game extends Canvas implements Runnable {
 	private Keyboard keyboard;
 	private Window window;
 	
-	private Map map;
+	public Map map;
 	public Player player;
 	
 	private final int scale = 3;
@@ -67,6 +67,7 @@ public class Game extends Canvas implements Runnable {
 	
 	public Game() {	
 		
+		this.initializeJavaFx();
 		this.setDimensionAndPixels();
 		this.setResolution();
 		
@@ -74,9 +75,11 @@ public class Game extends Canvas implements Runnable {
 		this.map = new Map("Map1");
 		this.keyboard = new Keyboard();
 		this.addKeyListener(keyboard);
+		
 		this.mouse = new Mouse();
 		this.addMouseListener(mouse);
 		this.addMouseMotionListener(mouse);
+		
 		this.client = new Client(this, "localhost");
 		
 		String name = JOptionPane.showInputDialog(this, "Set your name", "Western shooter | Set your unique name", JOptionPane.INFORMATION_MESSAGE);
@@ -85,7 +88,7 @@ public class Game extends Canvas implements Runnable {
 		this.window = new Window(this.client, this.player);
 		this.frame.addWindowListener(window);
 		
-		this.initializeJavaFx();
+		
 		this.disableCursor();
 	}
 	
@@ -125,6 +128,10 @@ public class Game extends Canvas implements Runnable {
 	private void update() {
 		this.keyboard.update();
 		this.player.update();
+		
+		for (PlayerMP pMP : this.connectedPlayers) {
+			pMP.updateProjectiles();
+		}
 	}
 	
 	private void render() {
@@ -144,6 +151,8 @@ public class Game extends Canvas implements Runnable {
 			pMP.render(this.screen);
 		}
 		
+		
+		
 		// we render cursor
 		screen.renderCursor(this.mouse.getX(), this.mouse.getY());
 		
@@ -157,7 +166,7 @@ public class Game extends Canvas implements Runnable {
 		this.player.renderCurrentGunInfo(g, this);
 		
 		for (PlayerMP pMP : this.connectedPlayers) {
-			pMP.renderName(g, this);
+//			pMP.renderName(g, this);
 		}
 		
 		g.dispose();
@@ -194,21 +203,6 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 	
-	private void initializeJavaFx() {
-//		final CountDownLatch latch = new CountDownLatch(1);
-//		SwingUtilities.invokeLater(new Runnable() {
-//		    public void run() {
-//		        new JFXPanel(); // initializes JavaFX environment
-//		        latch.countDown();
-//		    }
-//		});
-//		try {
-//			latch.await();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-	}
-	
 	private void disableCursor() {
 		BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
@@ -226,6 +220,21 @@ public class Game extends Canvas implements Runnable {
 		this.running = false;
 		try {
 			this.thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void initializeJavaFx() {
+		final CountDownLatch latch = new CountDownLatch(1);
+		SwingUtilities.invokeLater(new Runnable() {
+		    public void run() {
+		        new JFXPanel(); // initializes JavaFX environment
+		        latch.countDown();
+		    }
+		});
+		try {
+			latch.await();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

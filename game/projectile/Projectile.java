@@ -8,13 +8,13 @@ import game.tile.Tile;
 
 public class Projectile {
 
-	protected final int xStarting, yStarting;
+	public final int xStarting, yStarting;
 	public double x, y;
 	public double nx, ny;
-	protected double angle;
+	public double angle;
 	
 	protected Map map;
-	protected Ammo ammo;
+	public Ammo ammo;
 	
 	public Projectile(int x, int y, double dir, Map map, Ammo ammo) {
 		this.xStarting = x;
@@ -27,12 +27,7 @@ public class Projectile {
 		this.ammo = ammo;
 		
 		this.nx = this.ammo.speed * Math.cos(this.angle);
-		this.ny = this.ammo.speed * Math.sin(this.angle);		
-		
-//		Media hit = new Media("file:///C:/Users/Vladino/workspace/Game/res/sound/desert.mp3");
-//		MediaPlayer mediaPlayer = new MediaPlayer(hit);
-//		mediaPlayer.setVolume(0.09);
-//		mediaPlayer.play();
+		this.ny = this.ammo.speed * Math.sin(this.angle);
 	}
 	
 	public void update() {
@@ -41,11 +36,7 @@ public class Projectile {
 	
 	public boolean checkCollision(int x, int y, int size, int xOffset, int yOffset) {
 		
-		int tileX = 0;
-		int tileY = 0;
-		
 		boolean solid = false;
-		
 		for (int c = 0; c < 4; c++) {
 			
 			int xt = ( x - c % 2 * size + xOffset) >> 4;

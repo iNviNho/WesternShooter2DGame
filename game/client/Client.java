@@ -9,13 +9,17 @@ import java.net.UnknownHostException;
 
 import javax.swing.JOptionPane;
 
+import game.ammo.Ammo;
+import game.ammo.EasyGunAmmo;
 import game.game.Game;
 import game.packet.Packet00Login;
 import game.packet.Packet01Move;
 import game.packet.Packet02SynchroPlayers;
 import game.packet.Packet03Disconnect;
+import game.packet.Packet04Projectile;
 import game.player.Player;
 import game.player.PlayerMP;
+import game.projectile.Projectile;
 
 public class Client extends Thread {
 
@@ -72,10 +76,7 @@ public class Client extends Thread {
 		// now we have a new player
 		case 00:
 			Packet00Login packetLogin = new Packet00Login(packet.getData());
-			System.out.println(packetLogin.username + " has connected ...");
-			
-			PlayerMP player = new PlayerMP(packetLogin.username, packetLogin.x, packetLogin.y, packetLogin.dir);
-			game.connectedPlayers.add(player);
+			this.loginPlayer(packetLogin);
 			break;
 		case 01:
 			Packet01Move movePacket = new Packet01Move(packet.getData());
@@ -89,10 +90,25 @@ public class Client extends Thread {
 			Packet03Disconnect disconnectPacket = new Packet03Disconnect(packet.getData());
 			this.disconnectPlayer(disconnectPacket);
 			break;
+		case 04:
+			Packet04Projectile projectilePacket = new Packet04Projectile(packet.getData());
+			this.newProjectile(projectilePacket);
+			break;
 		}
 	}
-	
-	
+
+	private void newProjectile(Packet04Projectile projectilePacket) {
+		
+		for (PlayerMP pMP : this.game.connectedPlayers) {
+			if (pMP.name.equals(projectilePacket.username)) {
+				
+				Projectile projectile = new Projectile(projectilePacket.xStarting, projectilePacket.yStarting, projectilePacket.dir, this.game.map, new EasyGunAmmo());
+				pMP.projectiles.add(projectile);
+				break;
+			}
+		}
+		
+	}
 
 	private void disconnectPlayer(Packet03Disconnect disconnectPacket) {
 		
@@ -128,6 +144,15 @@ public class Client extends Thread {
 			}
 		}
 		
+	}
+	
+	private void loginPlayer(Packet00Login packetLogin) {
+		
+		System.out.println("Napojil sa na " + packetLogin.x + " | " + packetLogin.y);
+		PlayerMP player = new PlayerMP(packetLogin.username, packetLogin.x, packetLogin.y, packetLogin.dir);
+		game.connectedPlayers.add(player);
+		
+		System.out.println(packetLogin.username + " has connected ...");
 	}
 
 	private int getPacketIdFromPacket(String message) {

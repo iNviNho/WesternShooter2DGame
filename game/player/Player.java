@@ -17,6 +17,7 @@ import game.keyboard.Keyboard;
 import game.map.Map;
 import game.mouse.Mouse;
 import game.packet.Packet01Move;
+import game.packet.Packet04Projectile;
 import game.projectile.Projectile;
 import game.screen.Screen;
 import game.spritesheet.Sprite;
@@ -39,8 +40,6 @@ public class Player extends Entity {
 	private int activeGunId;
 	// list of all ammos that player has
 	public List<Ammo> ammos = new ArrayList<Ammo>();
-	// list of currently active projectiles
-	public List<Projectile> projectiles = new ArrayList<Projectile>();
 
 	private boolean mayShoot = true;
 	private int mayShootTick = 0;
@@ -171,12 +170,19 @@ public class Player extends Entity {
 			
 			this.getActiveGun().inBin -= 1;
 			
-//			MediaPlayer mediaPlayer = new MediaPlayer(this.getAmmoToActiveGun().media);
-//			mediaPlayer.setVolume(0.3);
-//			mediaPlayer.play();
+			MediaPlayer mediaPlayer = new MediaPlayer(this.getAmmoToActiveGun().media);
+			mediaPlayer.setVolume(0.1);
+			mediaPlayer.play();
+			
+			this.sendShootPacket(projectile);
 		}
 	}
 	
+	private void sendShootPacket(Projectile projectile) {
+		Packet04Projectile projectilePacket = new Packet04Projectile(this.name, this.getAmmoToActiveGun().id, projectile.xStarting, projectile.yStarting, projectile.angle);
+		this.client.sendData(projectilePacket.getDataForSending());
+	}
+
 	/**
 	 * Reloading logic 
 	 */
